@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FuturAgro - Recomendação</title>
+    
+    <meta name="theme-color" content="#005d52">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/005d52/ffffff?text=FA">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #005d52; 
+            --accent-color: #2196f3; 
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --border-color: #ccc;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        /* CONTAINER DA FOLHA ESTILO A4 */
+        .folha-a4 {
+            background-color: #fff;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        /* CABEÇALHO */
+        .cabecalho {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cabecalho img {
+            max-width: 250px; 
+        }
+
+        .cabecalho h1 {
+            font-size: 22px;
+            color: var(--primary-color);
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        /* FORMULÁRIOS E LINHAS */
+        .linha {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .campo {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .campo label {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: var(--primary-color);
+        }
+
+        .campo input[type="text"], 
+        .campo input[type="number"] {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .campo input:focus {
+            outline: 2px solid var(--primary-color);
+        }
+
+        /* CAIXAS DE SELEÇÃO (CHECKBOXES) */
+        .opcoes-grupo {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .opcao-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 15px;
+        }
+
+        /* DESTAQUE PARA MÁQUINA E BOMBA */
+        .painel-maquina {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+            margin-bottom: 20px;
+        }
+
+        /* TABELA DE PRODUTOS */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 14px;
+        }
+
+        td input[type="text"], td input[type="number"], td select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .td-dosagem {
+            display: flex;
+            gap: 5px;
+        }
+        .td-dosagem input { width: 60%; border-bottom: 1px solid #eee; }
+        .td-dosagem select { width: 40%; border-bottom: 1px solid #eee; color: var(--primary-color); font-weight: bold;}
+
+        .btn-add-row {
+            background-color: #eee;
+            color: #333;
+            border: 1px dashed #aaa;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .btn-remove-row {
+            background: transparent;
+            border: none;
+            color: #e53935;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-remove-row:active {
+            transform: scale(0.9);
+        }
+
+        .col-remove {
+            border: none !important;
+            background-color: transparent !important;
+            width: 30px;
+            text-align: center;
+            padding: 0 5px;
+        }
+
+        /* TEXTAREA OBSERVAÇÃO */
+        .observacao textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: none;
+            box-sizing: border-box;
+        }
+
+        /* ASSINATURAS REFORMULADAS */
+        .assinaturas {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .assinatura-box {
+            flex: 1;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .input-assinatura {
+            width: 100%;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-size: 20px;
+            font-family: inherit;
+            color: var(--primary-color);
+            outline: none;
+            margin-bottom: 2px;
+        }
+
+        .input-assinatura::placeholder {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .assinatura-linha {
+            border-bottom: 1px solid #000;
+            margin-bottom: 5px;
+        }
+
+        /* BOTÃO GERAR PDF GERADOR */
+        .btn-gerar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* TELA DE CARREGAMENTO */
+        #loading-pdf { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; z-index: 999; flex-direction: column; justify-content: center; align-items: center; font-size: 18px; font-weight: bold; }
+        .spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ===================================================================== */
+        /* MODO PDF (Oculta bordas, botões e ajusta para impressão limpa)        */
+        /* ===================================================================== */
+        .pdf-mode {
+            padding: 20px !important;
+            box-shadow: none !important;
+        }
+        .pdf-mode .btn-add-row, 
+        .pdf-mode .btn-gerar,
+        .pdf-mode .col-remove {
+            display: none !important; /* Esconde a coluna de excluir no PDF */
+        }
+        .pdf-mode input[type="text"], 
+        .pdf-mode input[type="number"], 
+        .pdf-mode select,
+        .pdf-mode textarea {
+            border: none !important;
+            background: transparent !important;
+            appearance: none !important;
+            -moz-appearance: none !important;
+            -webkit-appearance: none !important;
+            padding: 0 !important;
+            color: #000 !important;
+        }
+        .pdf-mode .painel-maquina {
+            background-color: transparent !important;
+            border: 1px solid #000 !important;
+        }
+        .pdf-mode table, .pdf-mode th, .pdf-mode td {
+            border: 1px solid #000 !important;
+        }
+        .pdf-mode th {
+            background-color: #eee !important;
+            color: #000 !important;
+        }
+        .pdf-mode select::-ms-expand { display: none; }
+        .pdf-mode .input-assinatura::placeholder { color: transparent !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-pdf">
+        <div class="spinner"></div>
+        Gerando Receituário...
+    </div>
+
+    <div class="folha-a4" id="folha-relatorio">
+        
+        <div class="cabecalho">
+            <img src="FUTURAGRO_ETIQUETA.png" alt="FuturAgro Consultoria">
+            <h1>Recomendação</h1>
+        </div>
+
+        <div class="linha">
+            <div class="campo" style="flex: 2;">
+                <label>Nome do Produtor:</label>
+                <input type="text" id="produtor" placeholder="">
+            </div>
+            <div class="campo" style="flex: 1.5;">
+                <label>Fazenda:</label>
+                <input type="text" id="fazenda" placeholder="">
+            </div>
+        </div>
+
+        <div class="linha">
+            <div class="campo">
+                <label>Região:</label>
+                <input type="text" id="regiao" placeholder="">
+            </div>
+            <div class="campo">
+                <label>Talhão / Área:</label>
+                <input type="text" id="talhao" placeholder="">
+            </div>
+            <div class="campo">
+                <label>Data:</label>
+                <input type="text" id="dataAtual">
+            </div>
+        </div>
+
+        <div class="linha" style="margin-top: 20px;">
+            <div class="campo" style="flex: 1;">
+                <label>Cultura:</label>
+                <div class="opcoes-grupo">
+                    <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Soja</label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Milho</label>
+                    <label class="opcao-item" style="gap:2px;"><input type="checkbox" class="chk-cultura"> Outra <input type="text" style="border-bottom: 1px solid #ccc; border-top: none; border-left: none; border-right: none; padding: 2px; width: 80px;"></label>
+                </div>
+            </div>
+            <div class="campo" style="flex: 1;">
+                <label>Bico de Pulverização:</label>
+                <div class="opcoes-grupo">
+                    <label class="opcao-item"><input type="checkbox" class="chk-bico"> Leque</label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-bico"> Cônico</label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-bico"> Outro</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="linha">
+            <div class="campo" style="width: 100%;">
+                <label>Tipo de Aplicação / Alvo:</label>
+                <input type="text" id="aplicacao" placeholder="">
+            </div>
+        </div>
+
+        <div class="painel-maquina">
+            <div class="linha" style="margin-bottom: 0;">
+                <div class="campo">
+                    <label>Capacidade da Máquina (Lts):</label>
+                    <input type="number" id="capacidade" placeholder="" oninput="calcularBombaVazao('capacidade')">
+                </div>
+                <div class="campo">
+                    <label>Vazão (L/ha):</label>
+                    <input type="number" id="vazao" placeholder="" oninput="calcularBombaVazao('vazao')">
+                </div>
+                <div class="campo">
+                    <label>Bomba Total (Hectares):</label>
+                    <input type="number" id="bombaTotal" placeholder="" oninput="calcularBombaVazao('bomba')">
+                </div>
+            </div>
+        </div>
+
+        <table id="tabela-produtos">
+            <thead>
+                <tr>
+                    <th style="width: 45%;">Produtos</th>
+                    <th style="width: 25%;">Dosagem / ha</th>
+                    <th style="width: 30%;">Dosagem / Tanque</th>
+                    <th class="col-remove"></th> </tr>
+            </thead>
+            <tbody id="tbody-produtos">
+                </tbody>
+        </table>
+        
+        <button class="btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Linha de Produto</button>
+
+        <div class="campo observacao">
+            <label>Observação:</label>
+            <textarea id="observacao" placeholder=""></textarea>
+        </div>
+
+        <div class="assinaturas">
+            <div class="assinatura-box">
+                <input type="text" class="input-assinatura" id="nomeConsultorAssinatura" placeholder="Digite seu nome...">
+                <div class="assinatura-linha"></div>
+                <strong>Assinatura do Consultor</strong>
+            </div>
+            <div class="assinatura-box">
+                <div style="height: 31px;"></div>
+                <div class="assinatura-linha"></div>
+                <strong>Assinatura do Produtor</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="btn-gerar" onclick="gerarPDF()">Gerar PDF Final</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoje = new Date();
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const ano = hoje.getFullYear();
+            
+            document.getElementById('dataAtual').value = `${dia}/${mes}/${ano}`;
+            
+            for(let i=0; i<5; i++) adicionarLinhaProduto();
+        });
+
+        function calcularBombaVazao(origem) {
+            const cap = parseFloat(document.getElementById('capacidade').value);
+            const vaz = parseFloat(document.getElementById('vazao').value);
+            const bom = parseFloat(document.getElementById('bombaTotal').value);
+
+            if (origem === 'capacidade' || origem === 'vazao') {
+                if (cap > 0 && vaz > 0) {
+                    document.getElementById('bombaTotal').value = (cap / vaz).toFixed(1).replace('.0', '');
+                    recalcularTodaTabela();
+                }
+            }
+            else if (origem === 'bomba') {
+                if (cap > 0 && bom > 0) {
+                    document.getElementById('vazao').value = (cap / bom).toFixed(1).replace('.0', '');
+                    recalcularTodaTabela();
+                }
+            }
+        }
+
+        function adicionarLinhaProduto() {
+            const tbody = document.getElementById('tbody-produtos');
+            const tr = document.createElement('tr');
+            
+            tr.innerHTML = `
+                <td><input type="text" placeholder="Nome do Produto"></td>
+                <td class="td-dosagem">
+                    <input type="number" class="dosagem-input" placeholder="" oninput="calcularLinha(this)">
+                    <select class="medida-select" onchange="calcularLinha(this)">
+                        <option value="ml">ml</option>
+                        <option value="gr">gr</option>
+                        <option value="LT">LT</option>
+                        <option value="Kg">Kg</option>
+                    </select>
+                </td>
+                <td><strong class="resultado-tanque">--</strong></td>
+                <td class="col-remove">
+                    <button class="btn-remove-row" onclick="removerLinhaProduto(this)" title="Excluir Linha">❌</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removerLinhaProduto(btn) {
+            // Encontra a linha atual e remove
+            const tr = btn.closest('tr');
+            tr.remove();
+            recalcularTodaTabela();
+        }
+
+        function recalcularTodaTabela() {
+            const inputs = document.querySelectorAll('.dosagem-input');
+            inputs.forEach(input => calcularLinha(input));
+        }
+
+        function calcularLinha(elemento) {
+            const tr = elemento.closest('tr');
+            const inputDosagem = tr.querySelector('.dosagem-input').value;
+            const selectMedida = tr.querySelector('.medida-select').value;
+            const resultadoBox = tr.querySelector('.resultado-tanque');
+            
+            const bombaTotal = parseFloat(document.getElementById('bombaTotal').value);
+
+            if (!inputDosagem || inputDosagem <= 0 || isNaN(bombaTotal) || bombaTotal <= 0) {
+                resultadoBox.textContent = '--';
+                return;
+            }
+
+            let mathReal = parseFloat(inputDosagem) * bombaTotal;
+
+            if (selectMedida === 'ml') {
+                if (mathReal >= 1000) {
+                    resultadoBox.textContent = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' LT';
+                } else {
+                    resultadoBox.textContent = mathReal.toLocaleString('pt-BR') + ' ml';
+                }
+            } 
+            else if (selectMedida === 'gr') {
+                if (mathReal >= 1000) {
+                    resultadoBox.textContent = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' Kg';
+                } else {
+                    resultadoBox.textContent = mathReal.toLocaleString('pt-BR') + ' gr';
+                }
+            } 
+            else {
+                resultadoBox.textContent = mathReal.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' ' + selectMedida;
+            }
+        }
+
+        function gerarPDF() {
+            document.getElementById('loading-pdf').style.display = 'flex';
+            
+            const folha = document.getElementById('folha-relatorio');
+            const produtor = document.getElementById('produtor').value || 'Produtor';
+            const fazenda = document.getElementById('fazenda').value || 'Fazenda';
+            const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
+
+            folha.classList.add('pdf-mode');
+
+            setTimeout(() => {
+                const opcoes = {
+                    margin:       10, 
+                    filename:     nomeArquivo,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opcoes).from(folha).save().then(() => {
+                    folha.classList.remove('pdf-mode');
+                    document.getElementById('loading-pdf').style.display = 'none';
+                }).catch(err => {
+                    alert("Erro ao gerar PDF: " + err);
+                    folha.classList.remove('pdf-mode');
+                    document.getElementById('loading-pdf').style.display = 'none';
+                });
+            }, 500);
+        }
+    </script>
+</body>
+</html>
