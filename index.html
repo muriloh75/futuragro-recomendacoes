@@ -32,7 +32,7 @@
             color: var(--text-color);
         }
 
-        /* REMOVE AS SETINHAS INÚTEIS DOS CAMPOS DE NÚMERO (Libera muito espaço) */
+        /* REMOVE SETINHAS INÚTEIS NOS CAMPOS NÚMERICOS */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -143,7 +143,7 @@
             border-collapse: collapse;
             margin-top: 10px;
             margin-bottom: 20px;
-            table-layout: fixed; /* Força a tabela a respeitar as larguras */
+            table-layout: fixed;
         }
 
         th, td {
@@ -169,15 +169,32 @@
             box-sizing: border-box;
         }
 
-        /* NOVA LARGURA DA DOSAGEM PARA CABER A UNIDADE PERFEITAMENTE */
-        .td-dosagem {
+        /* ALINHAMENTOS DAS DOSAGENS */
+        .td-dosagem, .td-dosagem-tanque {
             display: flex;
             gap: 4px;
             align-items: center;
             width: 100%;
         }
-        .td-dosagem input { width: 55%; border-bottom: 1px solid #eee; text-align: center;}
-        .td-dosagem select { width: 45%; border-bottom: 1px solid #eee; color: var(--primary-color); font-weight: bold; cursor: pointer; padding-left: 2px;}
+        .td-dosagem input, .td-dosagem-tanque input { 
+            width: 55%; 
+            border-bottom: 1px solid #eee; 
+            text-align: center;
+        }
+        .td-dosagem select { 
+            width: 45%; 
+            border-bottom: 1px solid #eee; 
+            color: var(--primary-color); 
+            font-weight: bold; 
+            cursor: pointer; 
+            padding-left: 2px;
+        }
+        .td-dosagem-tanque span {
+            width: 45%; 
+            color: var(--primary-color); 
+            font-weight: bold; 
+            padding-left: 2px;
+        }
 
         .btn-add-row {
             background-color: #eee;
@@ -226,7 +243,7 @@
             box-sizing: border-box;
         }
 
-        /* ASSINATURAS REFORMULADAS */
+        /* ASSINATURAS */
         .assinaturas {
             display: flex;
             justify-content: space-between;
@@ -309,6 +326,11 @@
             -moz-appearance: none !important;
             -webkit-appearance: none !important;
             padding: 0 !important;
+            color: #000 !important;
+        }
+        /* Força a cor preta nas unidades da tabela para a impressão */
+        .pdf-mode select, 
+        .pdf-mode .unidade-tanque-display {
             color: #000 !important;
         }
         .pdf-mode .painel-maquina {
@@ -413,8 +435,8 @@
             <thead>
                 <tr>
                     <th style="width: 42%;">Produtos</th>
-                    <th style="width: 31%;">Dosagem / ha</th>
-                    <th style="width: 27%;">Dosagem / Tanque</th>
+                    <th style="width: 29%;">Dosagem / ha</th>
+                    <th style="width: 29%;">Dosagem / Tanque</th>
                     <th class="col-remove"></th>
                 </tr>
             </thead>
@@ -492,7 +514,10 @@
                         <option value="Kg">Kg</option>
                     </select>
                 </td>
-                <td><strong class="resultado-tanque">--</strong></td>
+                <td class="td-dosagem-tanque">
+                    <input type="number" step="0.01" class="dosagem-tanque-input" placeholder="" oninput="calcularLinhaInverso(this)">
+                    <span class="unidade-tanque-display">ml</span>
+                </td>
                 <td class="col-remove">
                     <button class="btn-remove-row" onclick="removerLinhaProduto(this)" title="Excluir Linha">❌</button>
                 </td>
@@ -511,38 +536,67 @@
             inputs.forEach(input => calcularLinha(input));
         }
 
+        // Caminho normal: Usuário digita HA e calcula o Tanque
         function calcularLinha(elemento) {
             const tr = elemento.closest('tr');
             const inputDosagem = tr.querySelector('.dosagem-input').value;
             const selectMedida = tr.querySelector('.medida-select').value;
-            const resultadoBox = tr.querySelector('.resultado-tanque');
+            
+            const inputTanque = tr.querySelector('.dosagem-tanque-input');
+            const spanUnidade = tr.querySelector('.unidade-tanque-display');
             
             const bombaTotal = parseFloat(document.getElementById('bombaTotal').value);
 
             if (!inputDosagem || inputDosagem <= 0 || isNaN(bombaTotal) || bombaTotal <= 0) {
-                resultadoBox.textContent = '--';
+                inputTanque.value = '';
+                spanUnidade.textContent = selectMedida; // Reseta para a base
                 return;
             }
 
             let mathReal = parseFloat(inputDosagem) * bombaTotal;
 
-            if (selectMedida === 'ml') {
-                if (mathReal >= 1000) {
-                    resultadoBox.textContent = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' LT';
-                } else {
-                    resultadoBox.textContent = mathReal.toLocaleString('pt-BR') + ' ml';
-                }
+            if (selectMedida === 'ml' && mathReal >= 1000) {
+                inputTanque.value = +(mathReal / 1000).toFixed(2);
+                spanUnidade.textContent = 'LT';
             } 
-            else if (selectMedida === 'gr') {
-                if (mathReal >= 1000) {
-                    resultadoBox.textContent = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' Kg';
-                } else {
-                    resultadoBox.textContent = mathReal.toLocaleString('pt-BR') + ' gr';
-                }
+            else if (selectMedida === 'gr' && mathReal >= 1000) {
+                inputTanque.value = +(mathReal / 1000).toFixed(2);
+                spanUnidade.textContent = 'Kg';
             } 
             else {
-                resultadoBox.textContent = mathReal.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' ' + selectMedida;
+                inputTanque.value = +(mathReal).toFixed(2);
+                spanUnidade.textContent = selectMedida;
             }
+        }
+
+        // Caminho reverso: Usuário digita TANQUE e calcula o HA
+        function calcularLinhaInverso(elemento) {
+            const tr = elemento.closest('tr');
+            const inputTanque = elemento;
+            const inputHa = tr.querySelector('.dosagem-input');
+            const selectMedida = tr.querySelector('.medida-select').value;
+            const spanUnidade = tr.querySelector('.unidade-tanque-display').textContent;
+            
+            const bombaTotal = parseFloat(document.getElementById('bombaTotal').value);
+
+            if (inputTanque.value.trim() === '' || isNaN(bombaTotal) || bombaTotal <= 0) {
+                inputHa.value = '';
+                return;
+            }
+
+            let valTanque = parseFloat(inputTanque.value);
+            let mathBase = valTanque;
+            
+            // Se o tanque estiver exibindo LT e a base for ml, desfaz a conversão
+            if (spanUnidade === 'LT' && selectMedida === 'ml') {
+                mathBase = valTanque * 1000;
+            } else if (spanUnidade === 'Kg' && selectMedida === 'gr') {
+                mathBase = valTanque * 1000;
+            } 
+
+            let valHa = mathBase / bombaTotal;
+            
+            inputHa.value = +(valHa.toFixed(2));
         }
 
         function gerarPDF() {
