@@ -32,6 +32,7 @@
             color: var(--text-color);
         }
 
+        /* REMOVE AS SETINHAS INÚTEIS DOS CAMPOS DE NÚMERO */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -41,6 +42,7 @@
             -moz-appearance: textfield;
         }
 
+        /* CONTAINER DA FOLHA ESTILO A4 */
         .folha-a4 {
             background-color: #fff;
             width: 100%;
@@ -53,6 +55,7 @@
             margin-bottom: 100px;
         }
 
+        /* CABEÇALHO */
         .cabecalho {
             display: flex;
             justify-content: space-between;
@@ -73,6 +76,7 @@
             text-transform: uppercase;
         }
 
+        /* FORMULÁRIOS E LINHAS */
         .linha {
             display: flex;
             gap: 15px;
@@ -109,6 +113,7 @@
             outline: 2px solid var(--primary-color);
         }
 
+        /* CAIXAS DE SELEÇÃO */
         .opcoes-grupo {
             display: flex;
             gap: 15px;
@@ -123,6 +128,7 @@
             font-size: 15px;
         }
 
+        /* DESTAQUE PARA MÁQUINA E BOMBA */
         .painel-maquina {
             background-color: #e8f5e9;
             padding: 15px;
@@ -131,6 +137,7 @@
             margin-bottom: 20px;
         }
 
+        /* TABELA DE PRODUTOS */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -199,7 +206,18 @@
             padding: 5px 0;
         }
 
-        /* O campo resultado agora também tem destaque visual */
+        /* Span que mostra a unidade do tanque (LT, ml, etc) */
+        .td-dosagem span.unidade-tanque {
+            width: 50%;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 16px;
+            text-align: left;
+            padding-left: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Estiliza o resultado no tanque */
         .resultado-tanque {
             font-weight: bold;
             color: #333 !important;
@@ -239,6 +257,7 @@
             padding: 0 5px;
         }
 
+        /* TEXTAREA OBSERVAÇÃO */
         .observacao textarea {
             width: 100%;
             height: 80px;
@@ -251,6 +270,7 @@
             box-sizing: border-box;
         }
 
+        /* ASSINATURAS REFORMULADAS */
         .assinaturas {
             display: flex;
             justify-content: space-between;
@@ -287,6 +307,7 @@
             margin-bottom: 5px;
         }
 
+        /* BOTÃO GERAR PDF */
         .btn-gerar {
             position: fixed;
             bottom: 30px;
@@ -304,6 +325,7 @@
             z-index: 100;
         }
 
+        /* TELA DE CARREGAMENTO */
         #loading-pdf { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; z-index: 999; flex-direction: column; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; }
         .spinner { border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -333,6 +355,7 @@
             padding: 0 !important;
             color: #000 !important;
         }
+        
         .pdf-mode .painel-maquina {
             background-color: transparent !important;
             border: 1px solid #000 !important;
@@ -346,6 +369,9 @@
         }
         .pdf-mode select::-ms-expand { display: none; }
         .pdf-mode .input-assinatura::placeholder { color: transparent !important; }
+        
+        /* Limpeza das bordas na tabela durante o PDF */
+        .pdf-mode .td-dosagem input, .pdf-mode .td-dosagem select { border-bottom: none !important; }
     </style>
 </head>
 <body>
@@ -514,7 +540,12 @@
                         <option value="Kg">Kg</option>
                     </select>
                 </td>
-                <td><input type="text" class="resultado-tanque" placeholder="--" onfocus="this.select()"></td>
+                
+                <td class="td-dosagem">
+                    <input type="number" step="0.01" class="resultado-tanque" placeholder="--" oninput="calcularReverso(this)" onfocus="this.select()">
+                    <span class="unidade-tanque">--</span>
+                </td>
+                
                 <td class="col-remove">
                     <button class="btn-remove-row" onclick="removerLinhaProduto(this)" title="Excluir Linha">❌</button>
                 </td>
@@ -533,39 +564,75 @@
             inputs.forEach(input => calcularLinha(input));
         }
 
+        // CÁLCULO NORMAL (Da Esquerda para a Direita)
         function calcularLinha(elemento) {
             const tr = elemento.closest('tr');
-            const inputDosagem = tr.querySelector('.dosagem-input').value;
+            const inputDosagem = tr.querySelector('.dosagem-input');
             const selectMedida = tr.querySelector('.medida-select').value;
-            const resultadoBox = tr.querySelector('.resultado-tanque');
+            
+            const inputTanque = tr.querySelector('.resultado-tanque');
+            const spanUnidade = tr.querySelector('.unidade-tanque');
             
             const bombaTotal = parseFloat(document.getElementById('bombaTotal').value);
 
-            // Mudei para preencher o .value em vez de .textContent
-            if (!inputDosagem || inputDosagem <= 0 || isNaN(bombaTotal) || bombaTotal <= 0) {
-                resultadoBox.value = '--';
+            if (!inputDosagem.value || isNaN(bombaTotal) || bombaTotal <= 0) {
+                inputTanque.value = '';
+                spanUnidade.textContent = '--';
                 return;
             }
 
-            let mathReal = parseFloat(inputDosagem) * bombaTotal;
+            let mathReal = parseFloat(inputDosagem.value) * bombaTotal;
+            let displayVal = mathReal;
+            let displayUnit = selectMedida;
 
-            if (selectMedida === 'ml') {
-                if (mathReal >= 1000) {
-                    resultadoBox.value = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' LT';
-                } else {
-                    resultadoBox.value = mathReal.toLocaleString('pt-BR') + ' ml';
-                }
-            } 
-            else if (selectMedida === 'gr') {
-                if (mathReal >= 1000) {
-                    resultadoBox.value = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' Kg';
-                } else {
-                    resultadoBox.value = mathReal.toLocaleString('pt-BR') + ' gr';
-                }
-            } 
-            else {
-                resultadoBox.value = mathReal.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' ' + selectMedida;
+            // Lógica de conversão
+            if (selectMedida === 'ml' && mathReal >= 1000) {
+                displayVal = mathReal / 1000;
+                displayUnit = 'LT';
+            } else if (selectMedida === 'gr' && mathReal >= 1000) {
+                displayVal = mathReal / 1000;
+                displayUnit = 'Kg';
             }
+
+            inputTanque.value = parseFloat(displayVal.toFixed(2));
+            spanUnidade.textContent = displayUnit;
+        }
+
+        // CÁLCULO REVERSO (Da Direita para a Esquerda)
+        function calcularReverso(elemento) {
+            const tr = elemento.closest('tr');
+            const inputDosagem = tr.querySelector('.dosagem-input');
+            const selectMedida = tr.querySelector('.medida-select').value;
+            
+            const inputTanque = tr.querySelector('.resultado-tanque');
+            const spanUnidade = tr.querySelector('.unidade-tanque');
+            
+            const bombaTotal = parseFloat(document.getElementById('bombaTotal').value);
+
+            // Se a unidade estava vazia, assume a unidade base do select
+            if (spanUnidade.textContent === '--') {
+                spanUnidade.textContent = selectMedida;
+            }
+
+            if (!inputTanque.value || isNaN(bombaTotal) || bombaTotal <= 0) {
+                inputDosagem.value = '';
+                return;
+            }
+
+            let valTanque = parseFloat(inputTanque.value);
+            let displayUnit = spanUnidade.textContent;
+            let totalBase = valTanque;
+
+            // Desfaz a conversão para voltar à medida por Hectare correta
+            if (displayUnit === 'LT' && selectMedida === 'ml') {
+                totalBase = valTanque * 1000;
+            } else if (displayUnit === 'Kg' && selectMedida === 'gr') {
+                totalBase = valTanque * 1000;
+            }
+
+            let valHa = totalBase / bombaTotal;
+            
+            inputDosagem.value = parseFloat(valHa.toFixed(2));
         }
 
         function gerarPDF() {
