@@ -32,7 +32,6 @@
             color: var(--text-color);
         }
 
-        /* REMOVE AS SETINHAS INÚTEIS DOS CAMPOS DE NÚMERO */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -42,7 +41,6 @@
             -moz-appearance: textfield;
         }
 
-        /* CONTAINER DA FOLHA ESTILO A4 */
         .folha-a4 {
             background-color: #fff;
             width: 100%;
@@ -55,7 +53,6 @@
             margin-bottom: 100px;
         }
 
-        /* CABEÇALHO */
         .cabecalho {
             display: flex;
             justify-content: space-between;
@@ -76,7 +73,6 @@
             text-transform: uppercase;
         }
 
-        /* FORMULÁRIOS E LINHAS */
         .linha {
             display: flex;
             gap: 15px;
@@ -113,7 +109,6 @@
             outline: 2px solid var(--primary-color);
         }
 
-        /* CAIXAS DE SELEÇÃO */
         .opcoes-grupo {
             display: flex;
             gap: 15px;
@@ -128,7 +123,6 @@
             font-size: 15px;
         }
 
-        /* DESTAQUE PARA MÁQUINA E BOMBA */
         .painel-maquina {
             background-color: #e8f5e9;
             padding: 15px;
@@ -137,24 +131,23 @@
             margin-bottom: 20px;
         }
 
-        /* TABELA DE PRODUTOS REFORMULADA E BLINDADA */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             margin-bottom: 20px;
-            table-layout: fixed; /* Força respeito absoluto às larguras */
+            table-layout: fixed; 
         }
 
         th, td {
             border: 1px solid #aaa;
             padding: 10px;
-            text-align: center; /* Centraliza tudo para não vazar nas bordas */
+            text-align: center; 
             vertical-align: middle;
             box-sizing: border-box;
         }
         
-        td:first-child { text-align: left; } /* Deixa o nome do produto alinhado à esquerda */
+        td:first-child { text-align: left; } 
 
         th {
             background-color: var(--primary-color);
@@ -190,7 +183,6 @@
             text-align: center;
         }
         
-        /* O SELECT SEM A SETINHA FEIA DO NAVEGADOR */
         .td-dosagem select { 
             width: 50%; 
             border: none;
@@ -200,17 +192,17 @@
             cursor: pointer;
             font-size: 16px;
             text-align: center;
-            appearance: none; /* Tira a seta nativa */
+            appearance: none; 
             -webkit-appearance: none;
             -moz-appearance: none;
             background: transparent;
             padding: 5px 0;
         }
 
-        /* Estiliza o resultado no tanque */
+        /* O campo resultado agora também tem destaque visual */
         .resultado-tanque {
-            font-size: 16px;
-            color: #333;
+            font-weight: bold;
+            color: #333 !important;
         }
 
         .btn-add-row {
@@ -242,10 +234,11 @@
         .col-remove {
             border: none !important;
             background-color: transparent !important;
-            padding: 0;
+            width: 40px;
+            text-align: center;
+            padding: 0 5px;
         }
 
-        /* TEXTAREA OBSERVAÇÃO */
         .observacao textarea {
             width: 100%;
             height: 80px;
@@ -258,7 +251,6 @@
             box-sizing: border-box;
         }
 
-        /* ASSINATURAS REFORMULADAS */
         .assinaturas {
             display: flex;
             justify-content: space-between;
@@ -295,7 +287,6 @@
             margin-bottom: 5px;
         }
 
-        /* BOTÃO GERAR PDF */
         .btn-gerar {
             position: fixed;
             bottom: 30px;
@@ -313,13 +304,12 @@
             z-index: 100;
         }
 
-        /* TELA DE CARREGAMENTO */
         #loading-pdf { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; z-index: 999; flex-direction: column; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; }
         .spinner { border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF (Oculta bordas, botões e ajusta para impressão limpa)        */
+        /* MODO PDF                                                              */
         /* ===================================================================== */
         .pdf-mode {
             padding: 20px !important;
@@ -524,7 +514,7 @@
                         <option value="Kg">Kg</option>
                     </select>
                 </td>
-                <td><strong class="resultado-tanque">--</strong></td>
+                <td><input type="text" class="resultado-tanque" placeholder="--" onfocus="this.select()"></td>
                 <td class="col-remove">
                     <button class="btn-remove-row" onclick="removerLinhaProduto(this)" title="Excluir Linha">❌</button>
                 </td>
@@ -551,8 +541,9 @@
             
             const bombaTotal = parseFloat(document.getElementById('bombaTotal').value);
 
+            // Mudei para preencher o .value em vez de .textContent
             if (!inputDosagem || inputDosagem <= 0 || isNaN(bombaTotal) || bombaTotal <= 0) {
-                resultadoBox.textContent = '--';
+                resultadoBox.value = '--';
                 return;
             }
 
@@ -560,20 +551,20 @@
 
             if (selectMedida === 'ml') {
                 if (mathReal >= 1000) {
-                    resultadoBox.textContent = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' LT';
+                    resultadoBox.value = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' LT';
                 } else {
-                    resultadoBox.textContent = mathReal.toLocaleString('pt-BR') + ' ml';
+                    resultadoBox.value = mathReal.toLocaleString('pt-BR') + ' ml';
                 }
             } 
             else if (selectMedida === 'gr') {
                 if (mathReal >= 1000) {
-                    resultadoBox.textContent = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' Kg';
+                    resultadoBox.value = (mathReal / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' Kg';
                 } else {
-                    resultadoBox.textContent = mathReal.toLocaleString('pt-BR') + ' gr';
+                    resultadoBox.value = mathReal.toLocaleString('pt-BR') + ' gr';
                 }
             } 
             else {
-                resultadoBox.textContent = mathReal.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' ' + selectMedida;
+                resultadoBox.value = mathReal.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' ' + selectMedida;
             }
         }
 
