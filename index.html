@@ -25,23 +25,26 @@
             font-family: Arial, Helvetica, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 20px 10px;
+            padding: 10px; /* Padding menor para mobile */
             display: flex;
             flex-direction: column;
             align-items: center;
             color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* CONTAINER DA FOLHA ESTILO A4 */
+        /* CONTAINER DA FOLHA */
         .folha-a4 {
             background-color: #fff;
             width: 100%;
             max-width: 800px;
-            padding: 40px;
+            padding: 20px; /* Adaptado para mobile */
             box-sizing: border-box;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-radius: 4px;
+            border-radius: 8px;
             position: relative;
+            margin-bottom: 80px; /* Espaço para o botão flutuante */
+            overflow-x: hidden;
         }
 
         /* CABEÇALHO */
@@ -50,16 +53,17 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 20px;
+            padding-bottom: 15px;
             margin-bottom: 20px;
         }
 
         .cabecalho img {
-            max-width: 250px; 
+            max-width: 180px; /* Um pouco menor para mobile */
+            height: auto;
         }
 
         .cabecalho h1 {
-            font-size: 22px;
+            font-size: 18px; /* Ajustado para mobile */
             color: var(--primary-color);
             margin: 0;
             text-transform: uppercase;
@@ -70,30 +74,32 @@
             display: flex;
             gap: 15px;
             margin-bottom: 15px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Permite empilhar no celular */
         }
 
         .campo {
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-width: 150px;
+            min-width: 100%; /* Força empilhamento no mobile por padrão */
         }
 
         .campo label {
             font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 4px;
+            font-size: 14px;
+            margin-bottom: 5px;
             color: var(--primary-color);
         }
 
         .campo input[type="text"], 
         .campo input[type="number"] {
-            padding: 8px;
+            padding: 12px; /* Área de toque maior para o dedo */
             border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 15px;
+            border-radius: 6px;
+            font-size: 16px;
             font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .campo input:focus {
@@ -106,13 +112,19 @@
             gap: 15px;
             align-items: center;
             flex-wrap: wrap;
+            padding: 5px 0;
         }
 
         .opcao-item {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 15px;
+            gap: 8px;
+            font-size: 16px;
+        }
+        
+        .opcao-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
         }
 
         /* DESTAQUE PARA MÁQUINA E BOMBA */
@@ -124,12 +136,20 @@
             margin-bottom: 20px;
         }
 
-        /* TABELA DE PRODUTOS */
+        /* TABELA DE PRODUTOS RESPONSIVA */
+        .tabela-wrapper {
+            width: 100%;
+            overflow-x: auto; /* Cria o scroll horizontal só para a tabela */
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
         table {
             width: 100%;
+            min-width: 500px; /* Garante que as colunas não se espremam demais */
             border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 20px;
         }
 
         th, td {
@@ -142,87 +162,81 @@
             background-color: var(--primary-color);
             color: white;
             font-size: 14px;
+            white-space: nowrap;
         }
 
         td input[type="text"], td input[type="number"], td select {
             width: 100%;
             border: none;
             background: transparent;
-            font-size: 15px;
+            font-size: 16px; /* Melhor para evitar zoom no iOS */
             font-family: inherit;
             outline: none;
+            padding: 5px 0;
         }
 
         .td-dosagem {
             display: flex;
             gap: 5px;
+            align-items: center;
         }
-        .td-dosagem input { width: 60%; border-bottom: 1px solid #eee; }
-        .td-dosagem select { width: 40%; border-bottom: 1px solid #eee; color: var(--primary-color); font-weight: bold;}
+        .td-dosagem input { width: 55%; border-bottom: 1px solid #eee; }
+        .td-dosagem select { width: 45%; border-bottom: 1px solid #eee; color: var(--primary-color); font-weight: bold; padding: 5px;}
 
         .btn-add-row {
-            background-color: #eee;
-            color: #333;
-            border: 1px dashed #aaa;
-            padding: 8px 15px;
-            border-radius: 4px;
+            background-color: #f5f5f5;
+            color: var(--primary-color);
+            border: 1px dashed var(--primary-color);
+            padding: 12px 15px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 16px;
             width: 100%;
             margin-bottom: 20px;
-        }
-
-        .btn-remove-row {
-            background: transparent;
-            border: none;
-            color: #e53935;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .btn-remove-row:active {
-            transform: scale(0.9);
         }
 
         .col-remove {
             border: none !important;
             background-color: transparent !important;
-            width: 30px;
+            width: 40px;
             text-align: center;
-            padding: 0 5px;
+            padding: 0;
+        }
+        .btn-remove-row {
+            background: transparent;
+            border: none;
+            color: #e53935;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 10px;
+            width: 100%;
         }
 
         /* TEXTAREA OBSERVAÇÃO */
         .observacao textarea {
             width: 100%;
-            height: 80px;
-            padding: 10px;
+            height: 100px;
+            padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 6px;
             font-family: inherit;
-            font-size: 15px;
+            font-size: 16px;
             resize: none;
             box-sizing: border-box;
         }
 
-        /* ASSINATURAS REFORMULADAS */
+        /* ASSINATURAS */
         .assinaturas {
             display: flex;
-            justify-content: space-between;
-            margin-top: 60px;
-            gap: 20px;
-            flex-wrap: wrap;
+            flex-direction: column; /* Empilha no mobile */
+            margin-top: 40px;
+            gap: 40px;
         }
 
         .assinatura-box {
-            flex: 1;
+            width: 100%;
             text-align: center;
-            min-width: 200px;
         }
 
         .input-assinatura {
@@ -234,35 +248,51 @@
             font-family: inherit;
             color: var(--primary-color);
             outline: none;
-            margin-bottom: 2px;
+            margin-bottom: 5px;
+            padding: 5px;
         }
 
         .input-assinatura::placeholder {
-            font-size: 14px;
+            font-size: 16px;
             color: #ccc;
         }
 
         .assinatura-linha {
             border-bottom: 1px solid #000;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
-        /* BOTÃO GERAR PDF GERADOR */
+        /* BOTÃO GERAR PDF FLUTUANTE */
         .btn-gerar {
             position: fixed;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 20px;
+            right: 20px;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 18px;
             font-size: 18px;
             font-weight: bold;
-            border-radius: 30px;
+            border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             cursor: pointer;
             z-index: 100;
+            text-align: center;
+        }
+
+        /* MEDIA QUERY PARA TELAS MAIORES (TABLETS E PC) */
+        @media (min-width: 600px) {
+            .folha-a4 { padding: 40px; }
+            .cabecalho img { max-width: 250px; }
+            .cabecalho h1 { font-size: 22px; }
+            .campo { min-width: 150px; }
+            /* Volta os campos a ficarem lado a lado se houver espaço */
+            #campo-produtor { flex: 2; min-width: 250px; }
+            #campo-fazenda { flex: 1.5; min-width: 200px; }
+            .assinaturas { flex-direction: row; justify-content: space-between; }
+            .assinatura-box { flex: 1; min-width: 200px; }
+            .btn-gerar { left: 50%; right: auto; transform: translateX(-50%); border-radius: 30px; width: auto; padding: 15px 40px; }
         }
 
         /* TELA DE CARREGAMENTO */
@@ -271,16 +301,24 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF (Oculta bordas, botões e ajusta para impressão limpa)        */
+        /* MODO PDF (Oculta scrollbars, zera bordas, simula tela de PC)          */
         /* ===================================================================== */
         .pdf-mode {
-            padding: 20px !important;
+            padding: 30px !important;
             box-shadow: none !important;
+            border-radius: 0 !important;
+            margin-bottom: 0 !important;
         }
+        
+        /* Ajustes forçados para o PDF ficar igual PC mesmo sendo gerado no Celular */
+        .pdf-mode .linha { flex-direction: row !important; flex-wrap: nowrap !important; }
+        .pdf-mode .assinaturas { flex-direction: row !important; justify-content: space-between !important; }
+        .pdf-mode .tabela-wrapper { overflow: visible !important; border: none !important; margin-bottom: 20px !important;}
+        
         .pdf-mode .btn-add-row, 
         .pdf-mode .btn-gerar,
         .pdf-mode .col-remove {
-            display: none !important; /* Esconde a coluna de excluir no PDF */
+            display: none !important;
         }
         .pdf-mode input[type="text"], 
         .pdf-mode input[type="number"], 
@@ -324,11 +362,11 @@
         </div>
 
         <div class="linha">
-            <div class="campo" style="flex: 2;">
+            <div class="campo" id="campo-produtor">
                 <label>Nome do Produtor:</label>
                 <input type="text" id="produtor" placeholder="">
             </div>
-            <div class="campo" style="flex: 1.5;">
+            <div class="campo" id="campo-fazenda">
                 <label>Fazenda:</label>
                 <input type="text" id="fazenda" placeholder="">
             </div>
@@ -349,16 +387,16 @@
             </div>
         </div>
 
-        <div class="linha" style="margin-top: 20px;">
-            <div class="campo" style="flex: 1;">
+        <div class="linha" style="margin-top: 10px;">
+            <div class="campo">
                 <label>Cultura:</label>
                 <div class="opcoes-grupo">
                     <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Soja</label>
                     <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Milho</label>
-                    <label class="opcao-item" style="gap:2px;"><input type="checkbox" class="chk-cultura"> Outra <input type="text" style="border-bottom: 1px solid #ccc; border-top: none; border-left: none; border-right: none; padding: 2px; width: 80px;"></label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Outra <input type="text" style="border-bottom: 1px solid #ccc; border-top: none; border-left: none; border-right: none; padding: 2px 5px; width: 100px;"></label>
                 </div>
             </div>
-            <div class="campo" style="flex: 1;">
+            <div class="campo">
                 <label>Bico de Pulverização:</label>
                 <div class="opcoes-grupo">
                     <label class="opcao-item"><input type="checkbox" class="chk-bico"> Leque</label>
@@ -369,7 +407,7 @@
         </div>
 
         <div class="linha">
-            <div class="campo" style="width: 100%;">
+            <div class="campo">
                 <label>Tipo de Aplicação / Alvo:</label>
                 <input type="text" id="aplicacao" placeholder="">
             </div>
@@ -378,33 +416,36 @@
         <div class="painel-maquina">
             <div class="linha" style="margin-bottom: 0;">
                 <div class="campo">
-                    <label>Capacidade da Máquina (Lts):</label>
-                    <input type="number" id="capacidade" placeholder="" oninput="calcularBombaVazao('capacidade')">
+                    <label>Cap. Máquina (Lts):</label>
+                    <input type="number" id="capacidade" oninput="calcularBombaVazao('capacidade')">
                 </div>
                 <div class="campo">
                     <label>Vazão (L/ha):</label>
-                    <input type="number" id="vazao" placeholder="" oninput="calcularBombaVazao('vazao')">
+                    <input type="number" id="vazao" oninput="calcularBombaVazao('vazao')">
                 </div>
                 <div class="campo">
-                    <label>Bomba Total (Hectares):</label>
-                    <input type="number" id="bombaTotal" placeholder="" oninput="calcularBombaVazao('bomba')">
+                    <label>Bomba Total (ha):</label>
+                    <input type="number" id="bombaTotal" oninput="calcularBombaVazao('bomba')">
                 </div>
             </div>
         </div>
 
-        <table id="tabela-produtos">
-            <thead>
-                <tr>
-                    <th style="width: 45%;">Produtos</th>
-                    <th style="width: 25%;">Dosagem / ha</th>
-                    <th style="width: 30%;">Dosagem / Tanque</th>
-                    <th class="col-remove"></th> </tr>
-            </thead>
-            <tbody id="tbody-produtos">
-                </tbody>
-        </table>
+        <div class="tabela-wrapper">
+            <table id="tabela-produtos">
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">Produtos</th>
+                        <th style="width: 25%;">Dosagem / ha</th>
+                        <th style="width: 30%;">Dosagem / Tanque</th>
+                        <th class="col-remove"></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-produtos">
+                    </tbody>
+            </table>
+        </div>
         
-        <button class="btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Linha de Produto</button>
+        <button class="btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Linha</button>
 
         <div class="campo observacao">
             <label>Observação:</label>
@@ -437,7 +478,7 @@
             
             document.getElementById('dataAtual').value = `${dia}/${mes}/${ano}`;
             
-            for(let i=0; i<5; i++) adicionarLinhaProduto();
+            for(let i=0; i<4; i++) adicionarLinhaProduto();
         });
 
         function calcularBombaVazao(origem) {
@@ -466,7 +507,7 @@
             tr.innerHTML = `
                 <td><input type="text" placeholder="Nome do Produto"></td>
                 <td class="td-dosagem">
-                    <input type="number" class="dosagem-input" placeholder="" oninput="calcularLinha(this)">
+                    <input type="number" class="dosagem-input" oninput="calcularLinha(this)">
                     <select class="medida-select" onchange="calcularLinha(this)">
                         <option value="ml">ml</option>
                         <option value="gr">gr</option>
@@ -476,14 +517,13 @@
                 </td>
                 <td><strong class="resultado-tanque">--</strong></td>
                 <td class="col-remove">
-                    <button class="btn-remove-row" onclick="removerLinhaProduto(this)" title="Excluir Linha">❌</button>
+                    <button class="btn-remove-row" onclick="removerLinhaProduto(this)">❌</button>
                 </td>
             `;
             tbody.appendChild(tr);
         }
 
         function removerLinhaProduto(btn) {
-            // Encontra a linha atual e remove
             const tr = btn.closest('tr');
             tr.remove();
             recalcularTodaTabela();
@@ -536,23 +576,39 @@
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
 
+            // Guarda as dimensões originais responsivas
+            const originalWidth = folha.style.width;
+            const originalMaxWidth = folha.style.maxWidth;
+            
+            // Ativa o modo PDF
             folha.classList.add('pdf-mode');
+            
+            // TRUQUE MOBILE: Força o container a ter 800px de largura temporariamente
+            // para que a biblioteca gere um PDF idêntico a uma tela de PC/A4
+            folha.style.width = '800px';
+            folha.style.maxWidth = '800px';
 
             setTimeout(() => {
                 const opcoes = {
                     margin:       10, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    // Avisa a biblioteca que a janela "virtual" tem 800px
+                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 html2pdf().set(opcoes).from(folha).save().then(() => {
+                    // Restaura a visualização de celular
                     folha.classList.remove('pdf-mode');
+                    folha.style.width = originalWidth;
+                    folha.style.maxWidth = originalMaxWidth;
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
                     folha.classList.remove('pdf-mode');
+                    folha.style.width = originalWidth;
+                    folha.style.maxWidth = originalMaxWidth;
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
             }, 500);
