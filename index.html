@@ -26,9 +26,7 @@
             background-color: var(--bg-color);
             margin: 0;
             padding: 40px 20px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            /* Flexbox removido para anular o bug do html2canvas com coordenadas negativas */
             color: var(--text-color);
             min-width: 850px;
         }
@@ -54,7 +52,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-radius: 4px;
             position: relative;
-            margin-bottom: 100px;
+            /* Centralização clássica, perfeita para a câmera do PDF */
+            margin: 0 auto 100px auto; 
         }
 
         .cabecalho {
@@ -329,12 +328,12 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF APLICADO APENAS AO MOLDE FANTASMA                            */
+        /* MODO PDF: TAMANHO DE 1 PÁGINA TRAVADO COM SEGURANÇA                   */
         /* ===================================================================== */
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
-            margin: 0 !important; 
+            margin: 0 auto !important; 
             
             width: 800px !important;
             max-width: 800px !important;
@@ -651,62 +650,35 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
-            // REMOVIDO: O comando window.scrollTo(0, 0) que forçava a tela a pular
+            const folha = document.getElementById('folha-relatorio');
             
-            const folhaOriginal = document.getElementById('folha-relatorio');
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
             
-            // 1. CRIANDO O MOLDE FANTASMA (Tira uma cópia da folha)
-            const clone = folhaOriginal.cloneNode(true);
-            
-            // 2. COPIANDO OS TEXTOS DIGITADOS PARA O MOLDE
-            const originais = folhaOriginal.querySelectorAll('input, select, textarea');
-            const clonados = clone.querySelectorAll('input, select, textarea');
-            originais.forEach((original, index) => {
-                clonados[index].value = original.value;
-                if (original.type === 'checkbox' || original.type === 'radio') {
-                    clonados[index].checked = original.checked;
-                }
-            });
-
-            // 3. APLICANDO O MODO PDF APENAS NA CÓPIA
-            clone.classList.add('pdf-mode');
-            
-            // 4. ESCONDENDO O MOLDE NO CANTO DA PÁGINA (Posição zero absoluta)
-            const containerOculto = document.createElement('div');
-            containerOculto.style.position = 'absolute';
-            containerOculto.style.top = '0';
-            containerOculto.style.left = '0';
-            containerOculto.style.width = '800px';
-            containerOculto.style.zIndex = '-9999';
-            containerOculto.appendChild(clone);
-            document.body.appendChild(containerOculto);
+            folha.classList.add('pdf-mode');
 
             setTimeout(() => {
                 const opcoes = {
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    // TRAVA DE CÂMERA: scrollY: 0 e x:0, y:0 garante que a foto pegue o molde no topo absoluto, ignorando a rolagem do usuário
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, x: 0, y: 0 }, 
+                    // Configuração limpa: deixa a câmera focar na folha sem forçar as coordenadas x/y
+                    html2canvas:  { scale: 2, useCORS: true }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                html2pdf().set(opcoes).from(clone).toPdf().get('pdf').then(function (pdf) {
+                html2pdf().set(opcoes).from(folha).toPdf().get('pdf').then(function (pdf) {
                     var totalPages = pdf.internal.getNumberOfPages();
                     for (var i = totalPages; i > 1; i--) {
-                        pdf.deletePage(i); // A TESOURA: Deleta qualquer página que passe da 1
+                        pdf.deletePage(i); // A TESOURA GARANTE A PÁGINA ÚNICA
                     }
                 }).save().then(() => {
-                    document.body.removeChild(containerOculto);
+                    folha.classList.remove('pdf-mode');
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
-                    if (document.body.contains(containerOculto)) {
-                        document.body.removeChild(containerOculto);
-                    }
+                    folha.classList.remove('pdf-mode');
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
             }, 300);
