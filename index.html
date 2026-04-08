@@ -651,12 +651,14 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
+            // REMOVIDO: O comando window.scrollTo(0, 0) que forçava a tela a pular
+            
             const folhaOriginal = document.getElementById('folha-relatorio');
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
             
-            // 1. CRIANDO O MOLDE FANTASMA (Tira uma cópia da folha sem mexer na tela original)
+            // 1. CRIANDO O MOLDE FANTASMA (Tira uma cópia da folha)
             const clone = folhaOriginal.cloneNode(true);
             
             // 2. COPIANDO OS TEXTOS DIGITADOS PARA O MOLDE
@@ -669,10 +671,10 @@
                 }
             });
 
-            // 3. APLICANDO O MODO PDF APENAS NA CÓPIA FANTASMA
+            // 3. APLICANDO O MODO PDF APENAS NA CÓPIA
             clone.classList.add('pdf-mode');
             
-            // 4. ESCONDENDO O MOLDE NO CANTO DA PÁGINA (Atrás de tudo, invisível pro usuário)
+            // 4. ESCONDENDO O MOLDE NO CANTO DA PÁGINA (Posição zero absoluta)
             const containerOculto = document.createElement('div');
             containerOculto.style.position = 'absolute';
             containerOculto.style.top = '0';
@@ -687,18 +689,17 @@
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true }, 
+                    // TRAVA DE CÂMERA: scrollY: 0 e x:0, y:0 garante que a foto pegue o molde no topo absoluto, ignorando a rolagem do usuário
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, x: 0, y: 0 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // A CÂMERA FOTOGRAFA APENAS O MOLDE E APLICA A "TESOURA"
                 html2pdf().set(opcoes).from(clone).toPdf().get('pdf').then(function (pdf) {
                     var totalPages = pdf.internal.getNumberOfPages();
                     for (var i = totalPages; i > 1; i--) {
-                        pdf.deletePage(i); // Deleta sumariamente qualquer página extra
+                        pdf.deletePage(i); // A TESOURA: Deleta qualquer página que passe da 1
                     }
                 }).save().then(() => {
-                    // DESTRÓI O MOLDE E LIMPA A TELA DE CARREGAMENTO
                     document.body.removeChild(containerOculto);
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
