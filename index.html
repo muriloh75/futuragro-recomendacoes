@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=850, maximum-scale=2.0, user-scalable=yes">
+    <meta name="viewport" content="width=850, maximum-scale=1.0, user-scalable=no">
     <title>FuturAgro - Recomendação</title>
     
     <meta name="theme-color" content="#005d52">
@@ -30,7 +30,6 @@
             flex-direction: column;
             align-items: center;
             color: var(--text-color);
-            /* A MÁGICA AQUI: Impede que o PC esmague o layout em telas divididas */
             min-width: 850px;
         }
 
@@ -271,7 +270,7 @@
         .assinaturas {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Alinha a linha preta pela base sempre */
+            align-items: flex-end; 
             margin-top: 60px;
             gap: 20px;
             flex-wrap: nowrap; 
@@ -330,18 +329,18 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF: TAMANHO DE 1 PÁGINA TRAVADO                                 */
+        /* MODO PDF: TAMANHO DE 1 PÁGINA TRAVADO COM SEGURANÇA                   */
         /* ===================================================================== */
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
             margin: 0 auto !important; 
             
-            /* Trava de proporção A4 exata (Garante 1 página só) */
+            /* Trava de proporção A4 reduzida milimetricamente (1120px) para garantir 1 página */
             width: 800px !important;
             max-width: 800px !important;
-            height: 1131px !important; 
-            max-height: 1131px !important;
+            height: 1120px !important; 
+            max-height: 1120px !important;
             
             box-sizing: border-box !important;
             overflow: hidden !important; 
@@ -653,7 +652,6 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
-            // Joga pro topo para garantir enquadramento exato
             window.scrollTo(0, 0);
             
             const folha = document.getElementById('folha-relatorio');
