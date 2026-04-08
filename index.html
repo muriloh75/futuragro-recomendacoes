@@ -321,25 +321,21 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF: TRAVA MATEMÁTICA DE 1 PÁGINA A4                             */
+        /* MODO PDF (LIVRE DE ALTURA, EVITA 2ª PÁGINA)                           */
         /* ===================================================================== */
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
             margin: 0 !important;
             
-            /* Trava de proporção A4 exata (Largura x 1.414) */
             width: 800px !important;
             max-width: 800px !important;
-            height: 1131px !important; 
-            max-height: 1131px !important;
+            height: auto !important; /* Altura livre para não engasgar o gerador */
             
             box-sizing: border-box !important;
-            overflow: hidden !important; /* Proíbe o vazamento de conteúdo para página 2 */
             background-color: white !important;
         }
         
-        /* Compressão Inteligente de Espaços (Só no PDF) para caber mais itens */
         .pdf-mode .cabecalho { padding-bottom: 10px !important; margin-bottom: 15px !important; }
         .pdf-mode .linha { margin-bottom: 10px !important; }
         .pdf-mode .painel-maquina { padding: 10px !important; margin-bottom: 15px !important; }
@@ -645,6 +641,9 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
+            // Joga a tela para o topo absoluto instantaneamente para não capturar margens vazias
+            window.scrollTo(0, 0);
+            
             const folha = document.getElementById('folha-relatorio');
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
@@ -655,16 +654,16 @@
             
             folha.classList.add('pdf-mode');
             
-            // Garantindo largura exata para a proporção A4
             folha.style.width = '800px';
             folha.style.maxWidth = '800px';
 
             setTimeout(() => {
                 const opcoes = {
-                    margin:       0, // Margem zerada (o padding do css atua como margem)
+                    margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    // scrollY: 0 garante que a câmera do PDF foque na ponta do documento
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 800 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
