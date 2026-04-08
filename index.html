@@ -26,7 +26,9 @@
             background-color: var(--bg-color);
             margin: 0;
             padding: 40px 20px; 
-            /* Flexbox removido para anular o bug do html2canvas com coordenadas negativas */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             color: var(--text-color);
             min-width: 850px;
         }
@@ -52,8 +54,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-radius: 4px;
             position: relative;
-            /* Centralização clássica, perfeita para a câmera do PDF */
-            margin: 0 auto 100px auto; 
+            margin-bottom: 100px;
         }
 
         .cabecalho {
@@ -650,6 +651,9 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
+            // Trazemos de volta a subida pra tela inicial por segurança antes de aplicar a âncora
+            window.scrollTo(0, 0); 
+            
             const folha = document.getElementById('folha-relatorio');
             
             const produtor = document.getElementById('produtor').value || 'Produtor';
@@ -663,15 +667,15 @@
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    // Configuração limpa: deixa a câmera focar na folha sem forçar as coordenadas x/y
-                    html2canvas:  { scale: 2, useCORS: true }, 
+                    // A ÂNCORA DA CÂMERA: scrollY: 0 e scrollX: 0 forçam a foto do topo absoluto!
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 html2pdf().set(opcoes).from(folha).toPdf().get('pdf').then(function (pdf) {
                     var totalPages = pdf.internal.getNumberOfPages();
                     for (var i = totalPages; i > 1; i--) {
-                        pdf.deletePage(i); // A TESOURA GARANTE A PÁGINA ÚNICA
+                        pdf.deletePage(i); 
                     }
                 }).save().then(() => {
                     folha.classList.remove('pdf-mode');
