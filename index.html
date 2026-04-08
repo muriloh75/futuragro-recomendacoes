@@ -25,18 +25,13 @@
             font-family: Arial, Helvetica, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 0;
-            color: var(--text-color);
-        }
-
-        /* CONTAINER NOVO PARA CENTRALIZAR SEM BUGAR O PDF */
-        #app-container {
+            padding: 40px 20px; 
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
-            width: 100%;
-            box-sizing: border-box;
+            color: var(--text-color);
+            /* A MÁGICA AQUI: Impede que o PC esmague o layout em telas divididas */
+            min-width: 850px;
         }
 
         input[type=number]::-webkit-inner-spin-button, 
@@ -273,11 +268,10 @@
             box-sizing: border-box;
         }
 
-        /* ASSINATURAS CORRIGIDAS (ALINHAMENTO MAGNÉTICO PELA BASE) */
         .assinaturas {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Esta linha obriga as assinaturas a ficarem retas na base */
+            align-items: flex-end; /* Alinha a linha preta pela base sempre */
             margin-top: 60px;
             gap: 20px;
             flex-wrap: nowrap; 
@@ -287,7 +281,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Joga todo o conteúdo da caixa pro chão */
+            justify-content: flex-end; 
             text-align: center;
             min-width: 200px;
         }
@@ -336,28 +330,21 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF: PREVENÇÃO DE CORTES ESQUERDOS E DIREITOS                    */
+        /* MODO PDF: TAMANHO DE 1 PÁGINA TRAVADO                                 */
         /* ===================================================================== */
-        
-        /* Joga todo o site para o canto superior esquerdo no momento da foto */
-        body.body-pdf-mode, .container-pdf-mode {
-            align-items: flex-start !important; 
-            justify-content: flex-start !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            background-color: white !important;
-        }
-
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
-            margin: 0 !important; 
+            margin: 0 auto !important; 
             
+            /* Trava de proporção A4 exata (Garante 1 página só) */
             width: 800px !important;
             max-width: 800px !important;
-            height: auto !important; 
+            height: 1131px !important; 
+            max-height: 1131px !important;
             
             box-sizing: border-box !important;
+            overflow: hidden !important; 
             background-color: white !important;
         }
         
@@ -409,119 +396,118 @@
         Gerando Receituário...
     </div>
 
-    <div id="app-container">
-        <div class="folha-a4" id="folha-relatorio">
-            
-            <div class="cabecalho">
-                <img src="FUTURAGRO_ETIQUETA.png" alt="FuturAgro Consultoria">
-                <h1>Recomendação</h1>
-            </div>
-
-            <div class="linha">
-                <div class="campo" style="flex: 2;">
-                    <label>Nome do Produtor:</label>
-                    <input type="text" id="produtor" placeholder="">
-                </div>
-                <div class="campo" style="flex: 1.5;">
-                    <label>Fazenda:</label>
-                    <input type="text" id="fazenda" placeholder="">
-                </div>
-            </div>
-
-            <div class="linha">
-                <div class="campo">
-                    <label>Região:</label>
-                    <input type="text" id="regiao" placeholder="">
-                </div>
-                <div class="campo">
-                    <label>Data:</label>
-                    <input type="text" id="dataAtual">
-                </div>
-            </div>
-
-            <div class="linha">
-                <div class="campo" style="width: 100%;">
-                    <label>Talhão / Área:</label>
-                    <input type="text" id="talhao" placeholder="Ex: T1, T2, T3, Pivô Central...">
-                </div>
-            </div>
-
-            <div class="linha" style="margin-top: 20px;">
-                <div class="campo" style="flex: 1;">
-                    <label>Cultura:</label>
-                    <div class="opcoes-grupo">
-                        <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Soja</label>
-                        <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Milho</label>
-                        <label class="opcao-item" style="gap:2px;"><input type="checkbox" class="chk-cultura"> Outra <input type="text" style="border-bottom: 1px solid #ccc; border-top: none; border-left: none; border-right: none; padding: 2px; width: 120px;"></label>
-                    </div>
-                </div>
-                <div class="campo" style="flex: 1;">
-                    <label>Bico de Pulverização:</label>
-                    <div class="opcoes-grupo">
-                        <label class="opcao-item"><input type="checkbox" class="chk-bico"> Leque</label>
-                        <label class="opcao-item"><input type="checkbox" class="chk-bico"> Cônico</label>
-                        <label class="opcao-item"><input type="checkbox" class="chk-bico"> Outro</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="linha">
-                <div class="campo" style="width: 100%;">
-                    <label>Tipo de Aplicação / Alvo:</label>
-                    <input type="text" id="aplicacao" placeholder="">
-                </div>
-            </div>
-
-            <div class="painel-maquina">
-                <div class="linha" style="margin-bottom: 0;">
-                    <div class="campo">
-                        <label>Capacidade da Máquina (Lts):</label>
-                        <input type="number" id="capacidade" placeholder="" oninput="calcularBombaVazao('capacidade')" onfocus="this.select()">
-                    </div>
-                    <div class="campo">
-                        <label>Vazão (L/ha):</label>
-                        <input type="number" id="vazao" placeholder="" step="0.01" oninput="calcularBombaVazao('vazao')" onfocus="this.select()">
-                    </div>
-                    <div class="campo">
-                        <label>Bomba Total (Hectares):</label>
-                        <input type="number" id="bombaTotal" placeholder="" step="0.01" oninput="calcularBombaVazao('bomba')" onfocus="this.select()">
-                    </div>
-                </div>
-            </div>
-
-            <table id="tabela-produtos">
-                <thead>
-                    <tr>
-                        <th style="width: 35%; text-align: left; padding-left: 10px;">Produtos</th>
-                        <th style="width: 30%;">Dosagem / ha</th>
-                        <th style="width: 30%;">Dosagem / Tanque</th>
-                        <th style="width: 5%;" class="col-remove"></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-produtos">
-                    </tbody>
-            </table>
-            
-            <button class="btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Linha de Produto</button>
-
-            <div class="campo observacao">
-                <label>Observação:</label>
-                <textarea id="observacao" placeholder=""></textarea>
-            </div>
-
-            <div class="assinaturas">
-                <div class="assinatura-box">
-                    <input type="text" class="input-assinatura" id="nomeConsultorAssinatura" placeholder="Digite seu nome...">
-                    <div class="assinatura-linha"></div>
-                    <strong>Assinatura do Consultor</strong>
-                </div>
-                <div class="assinatura-box">
-                    <div class="assinatura-linha"></div>
-                    <strong>Assinatura do Produtor</strong>
-                </div>
-            </div>
-
+    <div class="folha-a4" id="folha-relatorio">
+        
+        <div class="cabecalho">
+            <img src="FUTURAGRO_ETIQUETA.png" alt="FuturAgro Consultoria">
+            <h1>Recomendação</h1>
         </div>
+
+        <div class="linha">
+            <div class="campo" style="flex: 2;">
+                <label>Nome do Produtor:</label>
+                <input type="text" id="produtor" placeholder="">
+            </div>
+            <div class="campo" style="flex: 1.5;">
+                <label>Fazenda:</label>
+                <input type="text" id="fazenda" placeholder="">
+            </div>
+        </div>
+
+        <div class="linha">
+            <div class="campo">
+                <label>Região:</label>
+                <input type="text" id="regiao" placeholder="">
+            </div>
+            <div class="campo">
+                <label>Data:</label>
+                <input type="text" id="dataAtual">
+            </div>
+        </div>
+
+        <div class="linha">
+            <div class="campo" style="width: 100%;">
+                <label>Talhão / Área:</label>
+                <input type="text" id="talhao" placeholder="Ex: T1, T2, T3, Pivô Central...">
+            </div>
+        </div>
+
+        <div class="linha" style="margin-top: 20px;">
+            <div class="campo" style="flex: 1;">
+                <label>Cultura:</label>
+                <div class="opcoes-grupo">
+                    <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Soja</label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-cultura"> Milho</label>
+                    <label class="opcao-item" style="gap:2px;"><input type="checkbox" class="chk-cultura"> Outra <input type="text" style="border-bottom: 1px solid #ccc; border-top: none; border-left: none; border-right: none; padding: 2px; width: 120px;"></label>
+                </div>
+            </div>
+            <div class="campo" style="flex: 1;">
+                <label>Bico de Pulverização:</label>
+                <div class="opcoes-grupo">
+                    <label class="opcao-item"><input type="checkbox" class="chk-bico"> Leque</label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-bico"> Cônico</label>
+                    <label class="opcao-item"><input type="checkbox" class="chk-bico"> Outro</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="linha">
+            <div class="campo" style="width: 100%;">
+                <label>Tipo de Aplicação / Alvo:</label>
+                <input type="text" id="aplicacao" placeholder="">
+            </div>
+        </div>
+
+        <div class="painel-maquina">
+            <div class="linha" style="margin-bottom: 0;">
+                <div class="campo">
+                    <label>Capacidade da Máquina (Lts):</label>
+                    <input type="number" id="capacidade" placeholder="" oninput="calcularBombaVazao('capacidade')" onfocus="this.select()">
+                </div>
+                <div class="campo">
+                    <label>Vazão (L/ha):</label>
+                    <input type="number" id="vazao" placeholder="" step="0.01" oninput="calcularBombaVazao('vazao')" onfocus="this.select()">
+                </div>
+                <div class="campo">
+                    <label>Bomba Total (Hectares):</label>
+                    <input type="number" id="bombaTotal" placeholder="" step="0.01" oninput="calcularBombaVazao('bomba')" onfocus="this.select()">
+                </div>
+            </div>
+        </div>
+
+        <table id="tabela-produtos">
+            <thead>
+                <tr>
+                    <th style="width: 35%; text-align: left; padding-left: 10px;">Produtos</th>
+                    <th style="width: 30%;">Dosagem / ha</th>
+                    <th style="width: 30%;">Dosagem / Tanque</th>
+                    <th style="width: 5%;" class="col-remove"></th>
+                </tr>
+            </thead>
+            <tbody id="tbody-produtos">
+                </tbody>
+        </table>
+        
+        <button class="btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Linha de Produto</button>
+
+        <div class="campo observacao">
+            <label>Observação:</label>
+            <textarea id="observacao" placeholder=""></textarea>
+        </div>
+
+        <div class="assinaturas">
+            <div class="assinatura-box">
+                <input type="text" class="input-assinatura" id="nomeConsultorAssinatura" placeholder="Digite seu nome...">
+                <div class="assinatura-linha"></div>
+                <strong>Assinatura do Consultor</strong>
+            </div>
+            <div class="assinatura-box">
+                <div style="height: 31px;"></div>
+                <div class="assinatura-linha"></div>
+                <strong>Assinatura do Produtor</strong>
+            </div>
+        </div>
+
     </div>
 
     <button class="btn-gerar" onclick="gerarPDF()">Gerar PDF Final</button>
@@ -667,45 +653,35 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
+            // Joga pro topo para garantir enquadramento exato
             window.scrollTo(0, 0);
             
             const folha = document.getElementById('folha-relatorio');
-            const body = document.body;
-            const container = document.getElementById('app-container');
             
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
             
-            // Joga o site inteiro para o canto esquerdo da tela antes da foto
-            body.classList.add('body-pdf-mode');
-            container.classList.add('container-pdf-mode');
             folha.classList.add('pdf-mode');
 
-            // Timeout para dar tempo do navegador arrastar tudo pra esquerda
             setTimeout(() => {
                 const opcoes = {
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
+                    html2canvas:  { scale: 2, useCORS: true },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 html2pdf().set(opcoes).from(folha).save().then(() => {
-                    // Volta a folha pro centro depois que gera o PDF
                     folha.classList.remove('pdf-mode');
-                    container.classList.remove('container-pdf-mode');
-                    body.classList.remove('body-pdf-mode');
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
                     folha.classList.remove('pdf-mode');
-                    container.classList.remove('container-pdf-mode');
-                    body.classList.remove('body-pdf-mode');
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
-            }, 150);
+            }, 300);
         }
     </script>
 </body>
