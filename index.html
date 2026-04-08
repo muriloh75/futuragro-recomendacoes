@@ -26,6 +26,9 @@
             background-color: var(--bg-color);
             margin: 0;
             padding: 40px 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             color: var(--text-color);
         }
 
@@ -321,18 +324,34 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF                                                              */
+        /* MODO IMPRESSÃO RIGOROSA (EVITA CORTE NO LADO ESQUERDO)                */
         /* ===================================================================== */
+        
+        /* Modifica o Body inteiro para garantir o Ponto Zero */
+        body.body-pdf-mode {
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important; /* Desativa o flexbox centralizador */
+            width: 800px !important;
+            min-width: 800px !important;
+            overflow: visible !important;
+            background-color: white !important;
+        }
+
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
-            
-            /* Zera a margem para colar no canto superior esquerdo na hora do print */
-            margin: 0 !important; 
+            margin: 0 !important; /* Zera margens externas */
+            border-radius: 0 !important;
             
             width: 800px !important;
             max-width: 800px !important;
             height: auto !important; 
+            
+            position: relative !important;
+            left: 0 !important;
+            top: 0 !important;
+            transform: none !important;
             
             box-sizing: border-box !important;
             background-color: white !important;
@@ -643,41 +662,38 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
-            // Joga a tela para o topo absoluto antes de aplicar o modo PDF
+            // Joga a tela para o topo absoluto instantaneamente para alinhar
             window.scrollTo(0, 0);
             
             const folha = document.getElementById('folha-relatorio');
+            const body = document.body;
+            
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
-
-            const originalWidth = folha.style.width;
-            const originalMaxWidth = folha.style.maxWidth;
             
+            // Ativa o Modo Impressão Rigorosa no Body e na Folha
+            body.classList.add('body-pdf-mode');
             folha.classList.add('pdf-mode');
-            
-            folha.style.width = '800px';
-            folha.style.maxWidth = '800px';
 
             setTimeout(() => {
                 const opcoes = {
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+                    // Câmera do PDF configurada para começar estritamente em 0,0
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 html2pdf().set(opcoes).from(folha).save().then(() => {
                     folha.classList.remove('pdf-mode');
-                    folha.style.width = originalWidth;
-                    folha.style.maxWidth = originalMaxWidth;
+                    body.classList.remove('body-pdf-mode');
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
                     folha.classList.remove('pdf-mode');
-                    folha.style.width = originalWidth;
-                    folha.style.maxWidth = originalMaxWidth;
+                    body.classList.remove('body-pdf-mode');
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
             }, 500);
