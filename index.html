@@ -336,7 +336,6 @@
             box-shadow: none !important;
             margin: 0 auto !important; 
             
-            /* Trava de proporção A4 reduzida milimetricamente (1120px) para garantir 1 página */
             width: 800px !important;
             max-width: 800px !important;
             height: 1120px !important; 
@@ -667,7 +666,8 @@
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    // A VISEIRA ABSOLUTA: Bloqueia a câmera do PDF em exatos 800x1120px 
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800, windowHeight: 1120, width: 800, height: 1120 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
