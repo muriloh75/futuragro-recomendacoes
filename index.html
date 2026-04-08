@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=850, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=850, maximum-scale=2.0, user-scalable=yes">
     <title>FuturAgro - Recomendação</title>
     
     <meta name="theme-color" content="#005d52">
@@ -26,33 +26,37 @@
             background-color: var(--bg-color);
             margin: 0;
             padding: 40px 20px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            /* Removido o display:flex e align-items:center que causavam o corte no lado esquerdo */
             color: var(--text-color);
         }
 
+        /* REMOVE AS SETINHAS E SÍMBOLOS INÚTEIS DOS CAMPOS DE NÚMERO DEFINITIVAMENTE */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+            -webkit-appearance: none !important; 
+            appearance: none !important;
+            margin: 0 !important; 
+            display: none !important;
         }
         input[type=number] {
-            -moz-appearance: textfield;
+            -moz-appearance: textfield !important;
+            appearance: none !important;
         }
 
+        /* CONTAINER DA FOLHA ESTILO A4 */
         .folha-a4 {
             background-color: #fff;
             width: 100%;
             max-width: 800px;
+            margin: 0 auto 100px auto; /* Centraliza de forma segura, sem gerar corte no mobile */
             padding: 40px;
             box-sizing: border-box;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-radius: 4px;
             position: relative;
-            margin-bottom: 100px;
         }
 
+        /* CABEÇALHO */
         .cabecalho {
             display: flex;
             justify-content: space-between;
@@ -73,6 +77,7 @@
             text-transform: uppercase;
         }
 
+        /* FORMULÁRIOS E LINHAS */
         .linha {
             display: flex;
             gap: 15px;
@@ -109,6 +114,7 @@
             outline: 2px solid var(--primary-color);
         }
 
+        /* CAIXAS DE SELEÇÃO */
         .opcoes-grupo {
             display: flex;
             gap: 15px;
@@ -123,6 +129,7 @@
             font-size: 15px;
         }
 
+        /* DESTAQUE PARA MÁQUINA E BOMBA */
         .painel-maquina {
             background-color: #e8f5e9;
             padding: 15px;
@@ -131,6 +138,7 @@
             margin-bottom: 20px;
         }
 
+        /* TABELA DE PRODUTOS */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -321,18 +329,27 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF (LIVRE DE ALTURA, EVITA 2ª PÁGINA)                           */
+        /* MODO PDF: TRAVA MATEMÁTICA E POSIÇÃO ABSOLUTA PARA NÃO CORTAR         */
         /* ===================================================================== */
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
             margin: 0 !important;
             
+            /* Trava no Canto Superior Esquerdo da tela para o print não vazar */
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 9999 !important;
+            
+            /* Trava de proporção A4 exata (Largura x 1.414) */
             width: 800px !important;
             max-width: 800px !important;
-            height: auto !important; /* Altura livre para não engasgar o gerador */
+            height: 1131px !important; 
+            max-height: 1131px !important;
             
             box-sizing: border-box !important;
+            overflow: hidden !important; 
             background-color: white !important;
         }
         
@@ -641,7 +658,7 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
-            // Joga a tela para o topo absoluto instantaneamente para não capturar margens vazias
+            // Joga a tela para o topo e margem esquerda absolutos instantaneamente 
             window.scrollTo(0, 0);
             
             const folha = document.getElementById('folha-relatorio');
@@ -662,8 +679,8 @@
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    // scrollY: 0 garante que a câmera do PDF foque na ponta do documento
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 800 },
+                    // scrollY e scrollX zerados garantem captura exata
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
