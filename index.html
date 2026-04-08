@@ -33,6 +33,12 @@
             min-width: 850px;
         }
 
+        /* TRAVA MAGNÉTICA PARA O PC NÃO CORTAR O PDF */
+        body.is-printing {
+            align-items: flex-start !important; /* Joga tudo pro canto esquerdo */
+            padding: 0 !important;
+        }
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none !important; 
@@ -334,9 +340,8 @@
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
-            margin: 0 auto !important; 
+            margin: 0 !important; /* Retirado o 'auto' para não afastar do canto */
             
-            /* Trava de proporção A4 reduzida milimetricamente (1120px) para garantir 1 página */
             width: 800px !important;
             max-width: 800px !important;
             height: 1120px !important; 
@@ -655,11 +660,12 @@
             window.scrollTo(0, 0);
             
             const folha = document.getElementById('folha-relatorio');
-            
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
             
+            // A MÁGICA DE POSICIONAMENTO PARA O PC
+            document.body.classList.add('is-printing');
             folha.classList.add('pdf-mode');
 
             setTimeout(() => {
@@ -667,22 +673,23 @@
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // A MÁGICA DA TESOURA ACONTECE EXATAMENTE AQUI
                 html2pdf().set(opcoes).from(folha).toPdf().get('pdf').then(function (pdf) {
                     var totalPages = pdf.internal.getNumberOfPages();
                     for (var i = totalPages; i > 1; i--) {
-                        pdf.deletePage(i); // Deleta qualquer página que passe da 1
+                        pdf.deletePage(i);
                     }
                 }).save().then(() => {
                     folha.classList.remove('pdf-mode');
+                    document.body.classList.remove('is-printing');
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
                     folha.classList.remove('pdf-mode');
+                    document.body.classList.remove('is-printing');
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
             }, 300);
