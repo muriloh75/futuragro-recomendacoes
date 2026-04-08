@@ -321,13 +321,33 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF                                                              */
+        /* MODO PDF: TRAVA MATEMÁTICA DE 1 PÁGINA A4                             */
         /* ===================================================================== */
         .pdf-mode {
-            padding: 20px !important;
+            padding: 30px 40px !important;
             box-shadow: none !important;
-            margin-bottom: 0 !important;
+            margin: 0 !important;
+            
+            /* Trava de proporção A4 exata (Largura x 1.414) */
+            width: 800px !important;
+            max-width: 800px !important;
+            height: 1131px !important; 
+            max-height: 1131px !important;
+            
+            box-sizing: border-box !important;
+            overflow: hidden !important; /* Proíbe o vazamento de conteúdo para página 2 */
+            background-color: white !important;
         }
+        
+        /* Compressão Inteligente de Espaços (Só no PDF) para caber mais itens */
+        .pdf-mode .cabecalho { padding-bottom: 10px !important; margin-bottom: 15px !important; }
+        .pdf-mode .linha { margin-bottom: 10px !important; }
+        .pdf-mode .painel-maquina { padding: 10px !important; margin-bottom: 15px !important; }
+        .pdf-mode table { margin-bottom: 10px !important; }
+        .pdf-mode th, .pdf-mode td { padding: 6px 10px !important; }
+        .pdf-mode .observacao textarea { height: 60px !important; }
+        .pdf-mode .assinaturas { margin-top: 30px !important; }
+
         .pdf-mode .btn-add-row, 
         .pdf-mode .btn-gerar,
         .pdf-mode .col-remove {
@@ -630,11 +650,18 @@
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
 
+            const originalWidth = folha.style.width;
+            const originalMaxWidth = folha.style.maxWidth;
+            
             folha.classList.add('pdf-mode');
+            
+            // Garantindo largura exata para a proporção A4
+            folha.style.width = '800px';
+            folha.style.maxWidth = '800px';
 
             setTimeout(() => {
                 const opcoes = {
-                    margin:       10, 
+                    margin:       0, // Margem zerada (o padding do css atua como margem)
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { scale: 2, useCORS: true },
@@ -643,10 +670,14 @@
 
                 html2pdf().set(opcoes).from(folha).save().then(() => {
                     folha.classList.remove('pdf-mode');
+                    folha.style.width = originalWidth;
+                    folha.style.maxWidth = originalMaxWidth;
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
                     folha.classList.remove('pdf-mode');
+                    folha.style.width = originalWidth;
+                    folha.style.maxWidth = originalMaxWidth;
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
             }, 500);
