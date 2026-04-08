@@ -33,12 +33,6 @@
             min-width: 850px;
         }
 
-        /* TRAVA MAGNÉTICA PARA O PC NÃO CORTAR O PDF */
-        body.is-printing {
-            align-items: flex-start !important; /* Joga tudo pro canto esquerdo */
-            padding: 0 !important;
-        }
-
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none !important; 
@@ -335,12 +329,12 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ===================================================================== */
-        /* MODO PDF: TAMANHO DE 1 PÁGINA TRAVADO COM SEGURANÇA                   */
+        /* MODO PDF APLICADO APENAS AO MOLDE FANTASMA                            */
         /* ===================================================================== */
         .pdf-mode {
             padding: 30px 40px !important;
             box-shadow: none !important;
-            margin: 0 !important; /* Retirado o 'auto' para não afastar do canto */
+            margin: 0 !important; 
             
             width: 800px !important;
             max-width: 800px !important;
@@ -657,39 +651,61 @@
         function gerarPDF() {
             document.getElementById('loading-pdf').style.display = 'flex';
             
-            window.scrollTo(0, 0);
-            
-            const folha = document.getElementById('folha-relatorio');
+            const folhaOriginal = document.getElementById('folha-relatorio');
             const produtor = document.getElementById('produtor').value || 'Produtor';
             const fazenda = document.getElementById('fazenda').value || 'Fazenda';
             const nomeArquivo = `Recomendacao - ${fazenda} - ${produtor}.pdf`;
             
-            // A MÁGICA DE POSICIONAMENTO PARA O PC
-            document.body.classList.add('is-printing');
-            folha.classList.add('pdf-mode');
+            // 1. CRIANDO O MOLDE FANTASMA (Tira uma cópia da folha sem mexer na tela original)
+            const clone = folhaOriginal.cloneNode(true);
+            
+            // 2. COPIANDO OS TEXTOS DIGITADOS PARA O MOLDE
+            const originais = folhaOriginal.querySelectorAll('input, select, textarea');
+            const clonados = clone.querySelectorAll('input, select, textarea');
+            originais.forEach((original, index) => {
+                clonados[index].value = original.value;
+                if (original.type === 'checkbox' || original.type === 'radio') {
+                    clonados[index].checked = original.checked;
+                }
+            });
+
+            // 3. APLICANDO O MODO PDF APENAS NA CÓPIA FANTASMA
+            clone.classList.add('pdf-mode');
+            
+            // 4. ESCONDENDO O MOLDE NO CANTO DA PÁGINA (Atrás de tudo, invisível pro usuário)
+            const containerOculto = document.createElement('div');
+            containerOculto.style.position = 'absolute';
+            containerOculto.style.top = '0';
+            containerOculto.style.left = '0';
+            containerOculto.style.width = '800px';
+            containerOculto.style.zIndex = '-9999';
+            containerOculto.appendChild(clone);
+            document.body.appendChild(containerOculto);
 
             setTimeout(() => {
                 const opcoes = {
                     margin:       0, 
                     filename:     nomeArquivo,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
+                    html2canvas:  { scale: 2, useCORS: true }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                html2pdf().set(opcoes).from(folha).toPdf().get('pdf').then(function (pdf) {
+                // A CÂMERA FOTOGRAFA APENAS O MOLDE E APLICA A "TESOURA"
+                html2pdf().set(opcoes).from(clone).toPdf().get('pdf').then(function (pdf) {
                     var totalPages = pdf.internal.getNumberOfPages();
                     for (var i = totalPages; i > 1; i--) {
-                        pdf.deletePage(i);
+                        pdf.deletePage(i); // Deleta sumariamente qualquer página extra
                     }
                 }).save().then(() => {
-                    folha.classList.remove('pdf-mode');
-                    document.body.classList.remove('is-printing');
+                    // DESTRÓI O MOLDE E LIMPA A TELA DE CARREGAMENTO
+                    document.body.removeChild(containerOculto);
                     document.getElementById('loading-pdf').style.display = 'none';
                 }).catch(err => {
                     alert("Erro ao gerar PDF: " + err);
-                    folha.classList.remove('pdf-mode');
-                    document.body.classList.remove('is-printing');
+                    if (document.body.contains(containerOculto)) {
+                        document.body.removeChild(containerOculto);
+                    }
                     document.getElementById('loading-pdf').style.display = 'none';
                 });
             }, 300);
